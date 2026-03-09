@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LifeHub – حياتك في مكان واحد</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --surface3: #1e2d42;
+    --accent: #00d4ff;
+    --accent2: #7b61ff;
+    --accent3: #ff6b6b;
+    --accent4: #00e676;
+    --accent5: #ffb300;
+    --accent6: #ff6bcb;
+    --text: #e8f0fe;
+    --text-muted: #7a8ba0;
+    --glow: 0 0 20px rgba(0,212,255,0.3);
+    --radius: 18px;
+    --radius-sm: 10px;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'Cairo', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ===== BACKGROUND FX ===== */
+  .bg-fx {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    overflow: hidden;
+  }
+  .bg-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.18;
+    animation: drift 12s ease-in-out infinite alternate;
+  }
+  .orb1 { width:500px; height:500px; background:#00d4ff; top:-150px; right:-100px; animation-delay:0s; }
+  .orb2 { width:400px; height:400px; background:#7b61ff; bottom:-100px; left:-100px; animation-delay:-4s; }
+  .orb3 { width:300px; height:300px; background:#ff6b6b; top:40%; left:30%; animation-delay:-8s; }
+  @keyframes drift { from { transform: translateY(0) scale(1); } to { transform: translateY(40px) scale(1.1); } }
+
+  /* ===== PHONE FRAME ===== */
+  .app-wrapper {
+    position: relative; z-index: 1;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 30px 16px 60px;
+    min-height: 100vh;
+  }
+
+  /* Header branding */
+  .brand-header {
+    text-align: center;
+    margin-bottom: 28px;
+    animation: fadeDown .7s ease;
+  }
+  .brand-logo {
+    font-family: 'Tajawal', sans-serif;
+    font-size: 2.8rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #00d4ff, #7b61ff, #ff6bcb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+  .brand-tagline {
+    font-size: .9rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+    font-weight: 300;
+    letter-spacing: 2px;
+  }
+
+  /* Phone shell */
+  .phone {
+    width: 100%;
+    max-width: 390px;
+    background: var(--surface);
+    border-radius: 44px;
+    border: 1.5px solid rgba(255,255,255,0.08);
+    box-shadow: 0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,212,255,0.05);
+    overflow: hidden;
+    min-height: 780px;
+    position: relative;
+    animation: riseUp .8s cubic-bezier(.22,.68,0,1.3);
+  }
+  @keyframes riseUp { from { opacity:0; transform: translateY(60px) scale(.96); } to { opacity:1; transform: none; } }
+  @keyframes fadeDown { from { opacity:0; transform: translateY(-20px); } to { opacity:1; transform: none; } }
+
+  /* Notch */
+  .notch {
+    display: flex; justify-content: center; align-items: center;
+    padding: 12px 0 0;
+  }
+  .notch-pill {
+    width: 110px; height: 32px;
+    background: #0a0e1a;
+    border-radius: 20px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .notch-cam { width: 10px; height: 10px; background: #1e2d42; border-radius: 50%; }
+  .notch-speaker { width: 50px; height: 6px; background: #1e2d42; border-radius: 4px; }
+
+  /* Status bar */
+  .status-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 4px 24px 8px;
+    font-size: .7rem;
+    color: var(--text-muted);
+  }
+
+  /* Screen */
+  .screen {
+    position: relative;
+    padding: 0;
+    min-height: 680px;
+  }
+
+  /* ===== PAGES ===== */
+  .page { display: none; animation: pageIn .35s ease; }
+  .page.active { display: block; }
+  @keyframes pageIn { from { opacity:0; transform: translateX(18px); } to { opacity:1; transform:none; } }
+
+  /* ===== HOME PAGE ===== */
+  .home-hero {
+    background: linear-gradient(160deg, #111827 0%, #0d1829 100%);
+    padding: 20px 20px 16px;
+  }
+  .home-greeting {
+    font-size: .85rem;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+  .home-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+  }
+  .home-date {
+    font-size: .78rem;
+    color: var(--accent);
+    margin-top: 2px;
+  }
+
+  /* Quick stats strip */
+  .quick-stats {
+    display: flex; gap: 10px;
+    padding: 14px 20px 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .quick-stats::-webkit-scrollbar { display: none; }
+  .stat-chip {
+    flex-shrink: 0;
+    background: var(--surface2);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 50px;
+    padding: 7px 14px;
+    display: flex; align-items: center; gap: 7px;
+    font-size: .78rem;
+    white-space: nowrap;
+  }
+  .stat-chip .dot { width: 7px; height: 7px; border-radius: 50%; }
+
+  /* Section grid */
+  .section-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 16px 20px 8px;
+  }
+
+  .sec-card {
+    background: var(--surface2);
+    border-radius: var(--radius);
+    padding: 18px 16px;
+    border: 1px solid rgba(255,255,255,0.06);
+    cursor: pointer;
+    transition: transform .2s, box-shadow .2s, border-color .2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .sec-card::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, var(--card-color, #00d4ff) 0%, transparent 60%);
+    opacity: 0.06;
+    border-radius: inherit;
+  }
+  .sec-card:hover, .sec-card:active {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+    border-color: rgba(255,255,255,0.12);
+  }
+  .sec-icon {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+  }
+  .sec-title { font-size: .88rem; font-weight: 700; color: var(--text); }
+  .sec-sub { font-size: .72rem; color: var(--text-muted); margin-top: 3px; line-height: 1.4; }
+  .sec-badge {
+    position: absolute;
+    top: 12px; left: 12px;
+    background: var(--accent3);
+    color: #fff;
+    font-size: .6rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 20px;
+  }
+
+  /* Wide card */
+  .sec-card.wide { grid-column: 1 / -1; }
+
+  /* ===== INNER PAGES ===== */
+  .page-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 20px 10px;
+    position: sticky; top: 0;
+    background: var(--surface);
+    z-index: 10;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .back-btn {
+    width: 36px; height: 36px;
+    background: var(--surface2);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    font-size: 1rem;
+    flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,0.08);
+    transition: background .15s;
+  }
+  .back-btn:hover { background: var(--surface3); }
+  .page-title { font-size: 1.05rem; font-weight: 700; }
+  .page-icon { font-size: 1.2rem; }
+
+  .page-body { padding: 16px 20px 80px; overflow-y: auto; max-height: 620px; }
+  .page-body::-webkit-scrollbar { width: 3px; }
+  .page-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+  /* ===== CARDS ===== */
+  .info-card {
+    background: var(--surface2);
+    border-radius: var(--radius);
+    padding: 16px;
+    border: 1px solid rgba(255,255,255,0.06);
+    margin-bottom: 12px;
+  }
+  .info-card-title {
+    font-size: .8rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    margin-bottom: 10px;
+  }
+
+  /* Traffic map placeholder */
+  .map-mock {
+    width: 100%;
+    height: 160px;
+    background: linear-gradient(135deg, #0d1f35, #0a1829);
+    border-radius: var(--radius-sm);
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .map-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.05) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+  .map-road {
+    position: absolute;
+    background: rgba(0,212,255,0.25);
+    border-radius: 2px;
+  }
+  .map-road.h { height: 4px; left: 0; right: 0; }
+  .map-road.v { width: 4px; top: 0; bottom: 0; }
+  .map-road.congested { background: rgba(255,107,107,0.6); }
+  .map-road.clear { background: rgba(0,230,118,0.5); }
+  .map-dot {
+    position: absolute;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    border: 2px solid white;
+  }
+  .map-label {
+    position: absolute;
+    font-size: .6rem;
+    color: var(--accent);
+    font-weight: 700;
+    background: rgba(10,14,26,0.8);
+    padding: 2px 5px;
+    border-radius: 4px;
+  }
+  .map-pulse {
+    position: absolute;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--accent4);
+    animation: pulse 1.5s ease-out infinite;
+  }
+  @keyframes pulse { 0%{transform:scale(1);opacity:1} 100%{transform:scale(2.5);opacity:0} }
+
+  /* Route options */
+  .route-opt {
+    display: flex; align-items: center;
+    background: var(--surface3);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    border: 1px solid rgba(255,255,255,0.05);
+    cursor: pointer;
+    transition: border-color .2s;
+    gap: 12px;
+  }
+  .route-opt.best { border-color: var(--accent4); }
+  .route-opt-icon { font-size: 1.3rem; flex-shrink: 0; }
+  .route-opt-info { flex: 1; }
+  .route-opt-name { font-size: .88rem; font-weight: 700; }
+  .route-opt-detail { font-size: .73rem; color: var(--text-muted); margin-top: 2px; }
+  .route-tag {
+    font-size: .65rem; font-weight: 700;
+    padding: 3px 8px; border-radius: 20px;
+    flex-shrink: 0;
+  }
+  .tag-best { background: rgba(0,230,118,0.15); color: var(--accent4); }
+  .tag-fast { background: rgba(0,212,255,0.15); color: var(--accent); }
+  .tag-eco { background: rgba(123,97,255,0.15); color: var(--accent2); }
+
+  /* Congestion bars */
+  .congestion-row {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 8px;
+  }
+  .cong-label { font-size: .78rem; width: 90px; color: var(--text-muted); flex-shrink: 0; }
+  .cong-bar-wrap { flex: 1; height: 6px; background: var(--surface3); border-radius: 3px; overflow: hidden; }
+  .cong-bar { height: 100%; border-radius: 3px; transition: width 1s ease; }
+  .cong-val { font-size: .75rem; font-weight: 700; width: 32px; text-align: left; }
+
+  /* Finance */
+  .balance-hero {
+    background: linear-gradient(135deg, rgba(0,212,255,0.12), rgba(123,97,255,0.12));
+    border-radius: var(--radius);
+    padding: 20px;
+    text-align: center;
+    border: 1px solid rgba(0,212,255,0.2);
+    margin-bottom: 14px;
+  }
+  .balance-label { font-size: .78rem; color: var(--text-muted); }
+  .balance-amount { font-size: 2.2rem; font-weight: 900; color: var(--text); line-height: 1.1; }
+  .balance-currency { font-size: .85rem; color: var(--accent); }
+
+  .expense-row {
+    display: flex; align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    gap: 12px;
+  }
+  .expense-icon-wrap {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+  .expense-info { flex: 1; }
+  .expense-name { font-size: .85rem; font-weight: 600; }
+  .expense-date { font-size: .72rem; color: var(--text-muted); }
+  .expense-amount { font-size: .9rem; font-weight: 700; }
+
+  .budget-bar-wrap {
+    height: 10px;
+    background: var(--surface3);
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 8px 0;
+  }
+  .budget-bar { height: 100%; border-radius: 5px; transition: width 1.2s ease; }
+
+  /* News */
+  .news-card {
+    background: var(--surface2);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+    cursor: pointer;
+    transition: transform .2s;
+  }
+  .news-card:hover { transform: scale(1.01); }
+  .news-thumb {
+    height: 110px;
+    position: relative;
+    overflow: hidden;
+  }
+  .news-thumb-bg {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.5rem;
+  }
+  .news-category {
+    position: absolute;
+    top: 8px; right: 8px;
+    font-size: .62rem; font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 20px;
+  }
+  .news-body { padding: 12px 14px; }
+  .news-title { font-size: .88rem; font-weight: 700; line-height: 1.4; margin-bottom: 5px; }
+  .news-meta { font-size: .72rem; color: var(--text-muted); display: flex; gap: 8px; align-items: center; }
+
+  /* Market rates */
+  .market-row {
+    display: flex; align-items: center;
+    padding: 11px 14px;
+    background: var(--surface3);
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+    gap: 12px;
+  }
+  .market-icon { font-size: 1.4rem; flex-shrink: 0; }
+  .market-name { font-size: .88rem; font-weight: 700; flex: 1; }
+  .market-price { font-size: .95rem; font-weight: 900; }
+  .market-change { font-size: .72rem; font-weight: 600; padding: 2px 7px; border-radius: 20px; }
+  .up { color: var(--accent4); }
+  .down { color: var(--accent3); }
+  .up-bg { background: rgba(0,230,118,0.12); color: var(--accent4); }
+  .down-bg { background: rgba(255,107,107,0.12); color: var(--accent3); }
+
+  /* Relations */
+  .member-row {
+    display: flex; align-items: center;
+    padding: 12px 0;
+    gap: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .avatar {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .member-info { flex: 1; }
+  .member-name { font-size: .9rem; font-weight: 700; }
+  .member-role { font-size: .73rem; color: var(--text-muted); }
+  .member-budget { font-size: .85rem; font-weight: 700; color: var(--accent4); }
+
+  .shared-task {
+    display: flex; align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .task-check {
+    width: 20px; height: 20px;
+    border-radius: 6px;
+    border: 2px solid rgba(255,255,255,0.15);
+    display: flex; align-items: center; justify-content: center;
+    font-size: .75rem;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .task-check.done { background: var(--accent4); border-color: var(--accent4); }
+  .task-text { font-size: .85rem; flex: 1; }
+  .task-text.done { text-decoration: line-through; color: var(--text-muted); }
+  .task-assignee { font-size: .7rem; color: var(--text-muted); }
+
+  /* Health */
+  .med-card {
+    background: var(--surface2);
+    border-radius: var(--radius);
+    padding: 16px;
+    border: 1px solid rgba(255,255,255,0.06);
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .med-icon-wrap {
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+  }
+  .med-info { flex: 1; }
+  .med-name { font-size: .95rem; font-weight: 700; }
+  .med-dose { font-size: .75rem; color: var(--text-muted); margin-top: 2px; }
+  .med-times { display: flex; gap: 5px; margin-top: 6px; flex-wrap: wrap; }
+  .med-time-chip {
+    font-size: .68rem;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+  .chip-done { background: rgba(0,230,118,0.15); color: var(--accent4); }
+  .chip-pending { background: rgba(255,179,0,0.15); color: var(--accent5); }
+  .chip-upcoming { background: rgba(0,212,255,0.12); color: var(--accent); }
+
+  .health-stat {
+    display: flex; align-items: center;
+    background: var(--surface3);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    gap: 12px;
+  }
+  .hstat-icon { font-size: 1.3rem; flex-shrink: 0; }
+  .hstat-label { font-size: .78rem; color: var(--text-muted); }
+  .hstat-val { font-size: 1.1rem; font-weight: 900; margin-top: 1px; }
+  .hstat-trend { font-size: .72rem; margin-top: 2px; }
+
+  /* ===== BOTTOM NAV ===== */
+  .bottom-nav {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(17,24,39,0.95);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255,255,255,0.07);
+    display: flex;
+    padding: 10px 8px 18px;
+  }
+  .nav-item {
+    flex: 1;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px;
+    cursor: pointer;
+    padding: 4px 2px;
+    border-radius: 12px;
+    transition: background .15s;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.04); }
+  .nav-item.active .nav-icon { transform: scale(1.15); }
+  .nav-icon { font-size: 1.15rem; transition: transform .2s; }
+  .nav-label {
+    font-size: .58rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    transition: color .2s;
+  }
+  .nav-item.active .nav-label { color: var(--accent); }
+  .nav-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: none;
+  }
+  .nav-item.active .nav-dot { display: block; }
+
+  /* ===== FEATURE ROWS ===== */
+  .feature-row {
+    display: flex; align-items: center;
+    background: var(--surface3);
+    border-radius: var(--radius-sm);
+    padding: 13px 14px;
+    margin-bottom: 8px;
+    gap: 12px;
+    border: 1px solid rgba(255,255,255,0.04);
+    cursor: pointer;
+    transition: border-color .2s;
+  }
+  .feature-row:hover { border-color: rgba(255,255,255,0.1); }
+  .fr-icon { font-size: 1.2rem; flex-shrink: 0; }
+  .fr-text { flex: 1; }
+  .fr-title { font-size: .88rem; font-weight: 600; }
+  .fr-sub { font-size: .73rem; color: var(--text-muted); margin-top: 2px; }
+  .fr-arrow { color: var(--text-muted); font-size: .8rem; }
+
+  /* Alert chip */
+  .alert-chip {
+    background: rgba(255,107,107,0.12);
+    border: 1px solid rgba(255,107,107,0.25);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: .82rem;
+    color: var(--accent3);
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  /* Pro badge */
+  .pro-banner {
+    background: linear-gradient(135deg, rgba(123,97,255,0.2), rgba(0,212,255,0.1));
+    border: 1px solid rgba(123,97,255,0.35);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 14px;
+    text-align: center;
+  }
+  .pro-title { font-size: 1rem; font-weight: 800; color: var(--accent2); margin-bottom: 4px; }
+  .pro-sub { font-size: .78rem; color: var(--text-muted); margin-bottom: 10px; }
+  .pro-btn {
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    color: white; font-weight: 700; font-size: .82rem;
+    border: none; border-radius: 20px;
+    padding: 8px 22px; cursor: pointer;
+    font-family: 'Cairo', sans-serif;
+  }
+
+  /* Input mock */
+  .input-mock {
+    background: var(--surface3);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    font-size: .85rem;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  /* Divider */
+  .divider { height: 1px; background: rgba(255,255,255,0.05); margin: 12px 0; }
+
+  /* Section label */
+  .sec-label {
+    font-size: .72rem;
+    color: var(--text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    margin-top: 16px;
+  }
+  .sec-label:first-child { margin-top: 0; }
+
+  /* Scroll area */
+  .scroll-x {
+    display: flex; gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+    margin-bottom: 14px;
+  }
+  .scroll-x::-webkit-scrollbar { display: none; }
+
+  /* Transport option */
+  .transport-opt {
+    flex-shrink: 0;
+    background: var(--surface2);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: var(--radius);
+    padding: 14px 12px;
+    text-align: center;
+    min-width: 90px;
+    cursor: pointer;
+    transition: border-color .2s, transform .2s;
+  }
+  .transport-opt:hover { border-color: rgba(0,212,255,0.3); transform: translateY(-2px); }
+  .transport-opt.selected { border-color: var(--accent); background: rgba(0,212,255,0.06); }
+  .transport-opt .t-icon { font-size: 1.5rem; margin-bottom: 5px; }
+  .transport-opt .t-name { font-size: .72rem; font-weight: 700; margin-bottom: 3px; }
+  .transport-opt .t-time { font-size: .68rem; color: var(--accent); }
+  .transport-opt .t-cost { font-size: .68rem; color: var(--text-muted); }
+
+  /* Step list */
+  .step-item {
+    display: flex; gap: 12px;
+    padding: 8px 0;
+  }
+  .step-left {
+    display: flex; flex-direction: column; align-items: center;
+    flex-shrink: 0; width: 20px;
+  }
+  .step-num {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--bg);
+    font-size: .65rem; font-weight: 900;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .step-line { flex: 1; width: 2px; background: rgba(255,255,255,0.08); margin: 3px 0; min-height: 20px; }
+  .step-content { flex: 1; padding-bottom: 8px; }
+  .step-title { font-size: .85rem; font-weight: 600; }
+  .step-sub { font-size: .73rem; color: var(--text-muted); margin-top: 2px; }
+
+</style>
+</head>
+<body>
+
+<div class="bg-fx">
+  <div class="bg-orb orb1"></div>
+  <div class="bg-orb orb2"></div>
+  <div class="bg-orb orb3"></div>
+</div>
+
+<div class="app-wrapper">
+
+  <div class="brand-header">
+    <div class="brand-logo">LifeHub</div>
+    <div class="brand-tagline">حياتك كاملة · في مكان واحد</div>
+  </div>
+
+  <div class="phone">
+    <div class="notch">
+      <div class="notch-pill">
+        <div class="notch-cam"></div>
+        <div class="notch-speaker"></div>
+        <div class="notch-cam"></div>
+      </div>
+    </div>
+    <div class="status-bar">
+      <span>9:41</span>
+      <span style="display:flex;gap:4px;align-items:center;">
+        <span>▌▌▌▌</span>
+        <span>WiFi</span>
+        <span>🔋</span>
+      </span>
+    </div>
+
+    <div class="screen">
+
+      <!-- ====== HOME ====== -->
+      <div class="page active" id="page-home">
+        <div class="home-hero">
+          <div class="home-greeting">مرحباً بعودتك 👋</div>
+          <div class="home-name">أحمد محمد</div>
+          <div class="home-date">الإثنين، 9 مارس 2026</div>
+        </div>
+        <div class="quick-stats">
+          <div class="stat-chip"><div class="dot" style="background:#ff6b6b;"></div> ازدحام متوسط</div>
+          <div class="stat-chip"><div class="dot" style="background:#00e676;"></div> الميزانية OK</div>
+          <div class="stat-chip"><div class="dot" style="background:#ffb300;"></div> دواء الساعة 2م</div>
+          <div class="stat-chip"><div class="dot" style="background:#7b61ff;"></div> 3 أخبار جديدة</div>
+        </div>
+
+        <div style="padding:14px 20px 0;">
+          <div class="alert-chip">⚠️ تجاوزت ميزانية المطاعم بمقدار 120 جنيه هذا الأسبوع</div>
+        </div>
+
+        <div class="section-grid">
+          <div class="sec-card" onclick="showPage('traffic')" style="--card-color:#00d4ff;">
+            <div class="sec-icon" style="background:rgba(0,212,255,0.12);">🗺️</div>
+            <div class="sec-title">المرور</div>
+            <div class="sec-sub">طريقك الآن سريع ✅</div>
+          </div>
+          <div class="sec-card" onclick="showPage('transport')" style="--card-color:#7b61ff;">
+            <div class="sec-icon" style="background:rgba(123,97,255,0.12);">🚌</div>
+            <div class="sec-title">المواصلات</div>
+            <div class="sec-sub">خطط رحلتك الآن</div>
+          </div>
+          <div class="sec-card" onclick="showPage('wallet')" style="--card-color:#00e676;">
+            <div class="sec-badge">تنبيه</div>
+            <div class="sec-icon" style="background:rgba(0,230,118,0.12);">💳</div>
+            <div class="sec-title">المحفظة</div>
+            <div class="sec-sub">المتبقي: 2,350 جنيه</div>
+          </div>
+          <div class="sec-card" onclick="showPage('news')" style="--card-color:#ffb300;">
+            <div class="sec-icon" style="background:rgba(255,179,0,0.12);">📰</div>
+            <div class="sec-title">الأخبار</div>
+            <div class="sec-sub">الذهب ↑ +1.2%</div>
+          </div>
+          <div class="sec-card" onclick="showPage('relations')" style="--card-color:#ff6bcb;">
+            <div class="sec-icon" style="background:rgba(255,107,203,0.12);">👨‍👩‍👧</div>
+            <div class="sec-title">العلاقات</div>
+            <div class="sec-sub">3 مهام مشتركة</div>
+          </div>
+          <div class="sec-card" onclick="showPage('health')" style="--card-color:#ff6b6b;">
+            <div class="sec-icon" style="background:rgba(255,107,107,0.12);">💊</div>
+            <div class="sec-title">الصحة</div>
+            <div class="sec-sub">موعد دواء قادم</div>
+          </div>
+        </div>
+
+        <div style="padding:0 20px 80px;">
+          <div class="pro-banner">
+            <div class="pro-title">⭐ LifeHub Pro</div>
+            <div class="pro-sub">احصل على تحليلات متقدمة، تنبيهات فورية، ومزامنة العائلة</div>
+            <button class="pro-btn">اشترك الآن – 29 جنيه/شهر</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== TRAFFIC ====== -->
+      <div class="page" id="page-traffic">
+        <div class="page-header">
+          <div class="back-btn" onclick="showPage('home')">←</div>
+          <div class="page-icon">🗺️</div>
+          <div class="page-title">المرور والتنقل</div>
+        </div>
+        <div class="page-body">
+          <div class="map-mock">
+            <div class="map-grid"></div>
+            <div class="map-road h" style="top:40px;background:rgba(255,107,107,0.6);"></div>
+            <div class="map-road h" style="top:90px;background:rgba(0,230,118,0.5);"></div>
+            <div class="map-road h" style="top:130px;background:rgba(0,212,255,0.25);"></div>
+            <div class="map-road v" style="right:60px;background:rgba(255,179,0,0.4);"></div>
+            <div class="map-road v" style="right:130px;background:rgba(0,212,255,0.25);"></div>
+            <div class="map-road v" style="right:200px;background:rgba(0,230,118,0.5);"></div>
+            <div class="map-pulse" style="top:34px;right:115px;"></div>
+            <div class="map-dot" style="top:30px;right:110px;background:var(--accent);"></div>
+            <div class="map-dot" style="top:84px;right:190px;background:var(--accent4);"></div>
+            <div class="map-label" style="top:10px;right:85px;">موقعك</div>
+            <div class="map-label" style="bottom:8px;left:8px;">🟢 طريق سريع</div>
+            <div class="map-label" style="top:30px;left:8px;">🔴 ازدحام</div>
+          </div>
+
+          <div class="sec-label">كثافة المرور الآن</div>
+          <div class="info-card">
+            <div class="congestion-row">
+              <div class="cong-label">طريق الهرم</div>
+              <div class="cong-bar-wrap"><div class="cong-bar" style="width:80%;background:#ff6b6b;"></div></div>
+              <div class="cong-val" style="color:#ff6b6b;">80%</div>
+            </div>
+            <div class="congestion-row">
+              <div class="cong-label">كورنيش النيل</div>
+              <div class="cong-bar-wrap"><div class="cong-bar" style="width:45%;background:#ffb300;"></div></div>
+              <div class="cong-val" style="color:#ffb300;">45%</div>
+            </div>
+            <div class="congestion-row">
+              <div class="cong-label">طريق دائري</div>
+              <div class="cong-bar-wrap"><div class="cong-bar" style="width:20%;background:#00e676;"></div></div>
+              <div class="cong-val" style="color:#00e676;">20%</div>
+            </div>
+            <div class="congestion-row">
+              <div class="cong-label">أكتوبر–القاهرة</div>
+              <div class="cong-bar-wrap"><div class="cong-bar" style="width:65%;background:#ffb300;"></div></div>
+              <div class="cong-val" style="color:#ffb300;">65%</div>
+            </div>
+          </div>
+
+          <div class="sec-label">أفضل المسارات لك</div>
+          <div class="route-opt best">
+            <div class="route-opt-icon">🟢</div>
+            <div class="route-opt-info">
+              <div class="route-opt-name">الطريق الدائري الإقليمي</div>
+              <div class="route-opt-detail">18 دقيقة · 14 كم · لا ازدحام</div>
+            </div>
+            <div class="route-tag tag-best">الأفضل</div>
+          </div>
+          <div class="route-opt">
+            <div class="route-opt-icon">🔵</div>
+            <div class="route-opt-info">
+              <div class="route-opt-name">طريق الهرم الرئيسي</div>
+              <div class="route-opt-detail">31 دقيقة · 10 كم · ازدحام متوسط</div>
+            </div>
+            <div class="route-tag tag-fast">أقصر مسافة</div>
+          </div>
+          <div class="route-opt">
+            <div class="route-opt-icon">🟣</div>
+            <div class="route-opt-info">
+              <div class="route-opt-name">طريق كورنيش النيل</div>
+              <div class="route-opt-detail">25 دقيقة · 12 كم · حركة خفيفة</div>
+            </div>
+            <div class="route-tag tag-eco">منخفض الضغط</div>
+          </div>
+
+          <div class="sec-label">المناطق الأقل ازدحاماً</div>
+          <div class="feature-row">
+            <div class="fr-icon">📍</div>
+            <div class="fr-text">
+              <div class="fr-title">مدينة نصر – الجانب الشرقي</div>
+              <div class="fr-sub">تدفق سريع · متوسط 15 دقيقة للعبور</div>
+            </div>
+            <div class="fr-arrow">›</div>
+          </div>
+          <div class="feature-row">
+            <div class="fr-icon">📍</div>
+            <div class="fr-text">
+              <div class="fr-title">المهندسين – شارع جامعة الدول</div>
+              <div class="fr-sub">حركة طبيعية الآن · انتبه بعد 5م</div>
+            </div>
+            <div class="fr-arrow">›</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== TRANSPORT ====== -->
+      <div class="page" id="page-transport">
+        <div class="page-header">
+          <div class="back-btn" onclick="showPage('home')">←</div>
+          <div class="page-icon">🚌</div>
+          <div class="page-title">المواصلات</div>
+        </div>
+        <div class="page-body">
+          <div class="input-mock">🟢 <span style="color:var(--text);">موقعك الحالي – الجيزة</span></div>
+          <div class="input-mock">🔴 <span>إلى أين؟ أدخل الوجهة...</span></div>
+
+          <div class="sec-label">اختر وسيلة المواصلات</div>
+          <div class="scroll-x">
+            <div class="transport-opt selected">
+              <div class="t-icon">🚇</div>
+              <div class="t-name">مترو</div>
+              <div class="t-time">22 دقيقة</div>
+              <div class="t-cost">6 جنيه</div>
+            </div>
+            <div class="transport-opt">
+              <div class="t-icon">🚌</div>
+              <div class="t-name">باص</div>
+              <div class="t-time">38 دقيقة</div>
+              <div class="t-cost">3 جنيه</div>
+            </div>
+            <div class="transport-opt">
+              <div class="t-icon">🚗</div>
+              <div class="t-name">أوبر</div>
+              <div class="t-time">25 دقيقة</div>
+              <div class="t-cost">45 جنيه</div>
+            </div>
+            <div class="transport-opt">
+              <div class="t-icon">🛵</div>
+              <div class="t-name">توك توك</div>
+              <div class="t-time">18 دقيقة</div>
+              <div class="t-cost">15 جنيه</div>
+            </div>
+            <div class="transport-opt">
+              <div class="t-icon">🚶</div>
+              <div class="t-name">مشي</div>
+              <div class="t-time">55 دقيقة</div>
+              <div class="t-cost">0 جنيه</div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-title">🚇 خطوات رحلتك بالمترو</div>
+            <div class="step-item">
+              <div class="step-left"><div class="step-num">1</div><div class="step-line"></div></div>
+              <div class="step-content">
+                <div class="step-title">امشِ 5 دقائق لمحطة الجيزة</div>
+                <div class="step-sub">اتجاه الشمال على شارع الهرم</div>
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="step-left"><div class="step-num">2</div><div class="step-line"></div></div>
+              <div class="step-content">
+                <div class="step-title">ركب الخط الأول (الأزرق)</div>
+                <div class="step-sub">اتجاه هليوبوليس · 4 محطات</div>
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="step-left"><div class="step-num">3</div><div class="step-line"></div></div>
+              <div class="step-content">
+                <div class="step-title">تحويل في محطة السادات</div>
+                <div class="step-sub">انتقل للخط الثاني (الأحمر)</div>
+              </div>
+            </div>
+            <div class="step-item">
+              <div class="step-left"><div class="step-num">4</div><div class="step-line"></div></div>
+              <div class="step-content">
+                <div class="step-title">انزل عند محطة الوجهة</div>
+                <div class="step-sub">مشي 3 دقائق للوصول النهائي</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-card" style="background:rgba(0,230,118,0.06);border-color:rgba(0,230,118,0.2);">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div style="font-size:.82rem;font-weight:700;color:var(--accent4);">💡 LifeHub يوصي بالمترو</div>
+                <div style="font-size:.73rem;color:var(--text-muted);margin-top:3px;">أسرع بـ 13 دقيقة + يوفر عليك 39 جنيه مقارنة بأوبر</div>
+              </div>
+              <div style="font-size:1.5rem;">🏆</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== WALLET ====== -->
+      <div class="page" id="page-wallet">
+        <div class="page-header">
+          <div class="back-btn" onclick="showPage('home')">←</div>
+          <div class="page-icon">💳</div>
+          <div class="page-title">المحفظة والمصاريف</div>
+        </div>
+        <div class="page-body">
+          <div class="balance-hero">
+            <div class="balance-label">الرصيد المتبقي هذا الشهر</div>
+            <div class="balance-amount">2,350</div>
+            <div class="balance-currency">جنيه مصري</div>
+          </div>
+
+          <div class="alert-chip">🚨 تجاوزت ميزانية المطاعم (500 جنيه) – صرفت 620 جنيه</div>
+
+          <div class="sec-label">الميزانيات الشهرية</div>
+          <div class="info-card">
+            <div style="margin-bottom:10px;">
+              <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:4px;">
+                <span>🛒 التسوق</span><span style="color:var(--accent4);">400 / 800 ج</span>
+              </div>
+              <div class="budget-bar-wrap"><div class="budget-bar" style="width:50%;background:var(--accent4);"></div></div>
+            </div>
+            <div style="margin-bottom:10px;">
+              <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:4px;">
+                <span>🍽️ مطاعم</span><span style="color:var(--accent3);">620 / 500 ج</span>
+              </div>
+              <div class="budget-bar-wrap"><div class="budget-bar" style="width:100%;background:var(--accent3);"></div></div>
+            </div>
+            <div style="margin-bottom:10px;">
+              <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:4px;">
+                <span>🚗 مواصلات</span><span style="color:var(--accent);">180 / 400 ج</span>
+              </div>
+              <div class="budget-bar-wrap"><div class="budget-bar" style="width:45%;background:var(--accent);"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:4px;">
+                <span>💊 صحة</span><span style="color:var(--accent5);">150 / 300 ج</span>
+              </div>
+              <div class="budget-bar-wrap"><div class="budget-bar" style="width:50%;background:var(--accent5);"></div></div>
+            </div>
+          </div>
+
+          <div class="sec-label">آخر المعاملات</div>
+          <div class="expense-row">
+            <div class="expense-icon-wrap" style="background:rgba(255,107,107,0.12);">🍕</div>
+            <div class="expense-info">
+              <div class="expense-name">مطعم بيتزا هت</div>
+              <div class="expense-date">اليوم، 1:30م</div>
+            </div>
+            <div class="expense-amount" style="color:var(--accent3);">-85 ج</div>
+          </div>
+          <div class="expense-row">
+            <div class="expense-icon-wrap" style="background:rgba(0,212,255,0.12);">🚗</div>
+            <div class="expense-info">
+              <div class="expense-name">أوبر – الجيزة للقاهرة</div>
+              <div class="expense-date">أمس، 9:00ص</div>
+            </div>
+            <div class="expense-amount" style="color:var(--accent3);">-55 ج</div>
+          </div>
+          <div class="expense-row">
+            <div class="expense-icon-wrap" style="background:rgba(0,230,118,0.12);">💼</div>
+            <div class="expense-info">
+              <div class="expense-name">راتب مارس</div>
+              <div class="expense-date">1 مارس</div>
+            </div>
+            <div class="expense-amount" style="color:var(--accent4);">+8,500 ج</div>
+          </div>
+          <div class="expense-row">
+            <div class="expense-icon-wrap" style="background:rgba(123,97,255,0.12);">🛒</div>
+            <div class="expense-info">
+              <div class="expense-name">كارفور – بقالة أسبوعية</div>
+              <div class="expense-date">السبت الماضي</div>
+            </div>
+            <div class="expense-amount" style="color:var(--accent3);">-320 ج</div>
+          </div>
+
+          <div class="sec-label">نصيحة الذكاء الاصطناعي 🤖</div>
+          <div class="info-card" style="background:rgba(123,97,255,0.08);border-color:rgba(123,97,255,0.2);">
+            <div style="font-size:.83rem;line-height:1.7;">
+              📊 لو قللت مصاريف المطاعم بنسبة 30%، هتوفر <strong style="color:var(--accent2);">186 جنيه/شهر</strong> – يعني <strong style="color:var(--accent2);">2,232 جنيه/سنة</strong> يمكن استثمارها!
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== NEWS ====== -->
+      <div class="page" id="page-news">
+        <div class="page-header">
+          <div class="back-btn" onclick="showPage('home')">←</div>
+          <div class="page-icon">📰</div>
+          <div class="page-title">الأخبار والأسواق</div>
+        </div>
+        <div class="page-body">
+          <div class="sec-label">أسعار السوق الآن</div>
+          <div class="market-row">
+            <div class="market-icon">🥇</div>
+            <div class="market-name">الذهب عيار 21</div>
+            <div>
+              <div class="market-price">3,850 ج/جم</div>
+              <div class="market-change up-bg">↑ +1.2%</div>
+            </div>
+          </div>
+          <div class="market-row">
+            <div class="market-icon">🥈</div>
+            <div class="market-name">الفضة</div>
+            <div>
+              <div class="market-price">48 ج/جم</div>
+              <div class="market-change up-bg">↑ +0.8%</div>
+            </div>
+          </div>
+          <div class="market-row">
+            <div class="market-icon">💵</div>
+            <div class="market-name">الدولار الأمريكي</div>
+            <div>
+              <div class="market-price">50.45 ج</div>
+              <div class="market-change down-bg">↓ -0.3%</div>
+            </div>
+          </div>
+          <div class="market-row">
+            <div class="market-icon">💶</div>
+            <div class="market-name">اليورو</div>
+            <div>
+              <div class="market-price">54.20 ج</div>
+              <div class="market-change up-bg">↑ +0.5%</div>
+            </div>
+          </div>
+
+          <div class="sec-label">أبرز الأخبار</div>
+
+          <div class="news-card">
+            <div class="news-thumb">
+              <div class="news-thumb-bg" style="background:linear-gradient(135deg,#1a2235,#0d1829);">🌍</div>
+              <div class="news-category" style="background:rgba(255,107,107,0.9);color:white;">عاجل</div>
+            </div>
+            <div class="news-body">
+              <div class="news-title">اجتماع طارئ لمجلس الأمن بشأن التوترات الإقليمية</div>
+              <div class="news-meta"><span>الجزيرة</span>·<span>منذ 30 دقيقة</span></div>
+            </div>
+          </div>
+
+          <div class="news-card">
+            <div class="news-thumb">
+              <div class="news-thumb-bg" style="background:linear-gradient(135deg,#1a2e1a,#0d1f0d);">📈</div>
+              <div class="news-category" style="background:rgba(0,230,118,0.9);color:#0a0e1a;">اقتصاد</div>
+            </div>
+            <div class="news-body">
+              <div class="news-title">ارتفاع مؤشر البورصة المصرية 2.3% في ختام التداولات</div>
+              <div class="news-meta"><span>رويترز</span>·<span>منذ ساعة</span></div>
+            </div>
+          </div>
+
+          <div class="news-card">
+            <div class="news-thumb">
+              <div class="news-thumb-bg" style="background:linear-gradient(135deg,#1a1a2e,#0d0d1f);">🤖</div>
+              <div class="news-category" style="background:rgba(123,97,255,0.9);color:white;">تقنية</div>
+            </div>
+            <div class="news-body">
+              <div class="news-title">إطلاق أحدث نماذج الذكاء الاصطناعي يُغيّر قواعد اللعبة التقنية</div>
+              <div class="news-meta"><span>BBC عربي</span>·<span>منذ 3 ساعات</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== RELATIONS ====== -->
+      <div class="page" id="page-relations">
+        <div class="page-header">
+          <div class="back-btn" onclick="showPage('home')">←</div>
+          <div class="page-icon">👨‍👩‍👧</div>
+          <div class="page-title">العلاقات والعائلة</div>
+        </div>
+        <div class="page-body">
+          <div class="sec-label">أعضاء المجموعة</div>
+          <div class="info-card">
+            <div class="member-row">
+              <div class="avatar" style="background:rgba(0,212,255,0.15);color:var(--accent);">أح</div>
+              <div class="member-info">
+                <div class="member-name">أحمد (أنت)</div>
+                <div class="member-role">مدير الحساب المشترك</div>
+              </div>
+              <div class="member-budget">1,500 ج</div>
+            </div>
+            <div class="member-row">
+              <div class="avatar" style="background:rgba(255,107,203,0.15);color:var(--accent6);">سا</div>
+              <div class="member-info">
+                <div class="member-name">سارة (الزوجة)</div>
+                <div class="member-role">عضو</div>
+              </div>
+              <div class="member-budget">1,200 ج</div>
+            </div>
+            <div class="member-row">
+              <div class="avatar" style="background:rgba(255,179,0,0.15);color:var(--accent5);">وا</div>
+              <div class="member-info">
+                <div class="member-name">والدة (أم أحمد)</div>
+                <div class="member-role">عضو مشاهدة فقط</div>
+              </div>
+              <div class="member-budget">800 ج</div>
+            </div>
+          </div>
+
+          <div class="info-card" style="background:rgba(0,212,255,0.05);border-color:rgba(0,212,255,0.15);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+              <div style="font-size:.85rem;font-weight:700;">الميزانية المشتركة</div>
+              <div style="font-size:.8rem;color:var(--accent);">3,500 / 5,000 ج</div>
+            </div>
+            <div class="budget-bar-wrap" style="height:12px;">
+              <div class="budget-bar" style="width:70%;background:linear-gradient(90deg,var(--accent),var(--accent2));"></div>
+            </div>
+            <div style="font-size:.73rem;color:var(--text-muted);margin-top:6px;">70% مستخدم · متبقي 1,500 جنيه</div>
+          </div>
+
+          <div class="sec-label">المهام المشتركة</div>
+          <div class="info-card">
+            <div class="shared-task">
+              <div class="task-check done">✓</div>
+              <div>
+                <div class="task-text done">دفع إيجار الشقة</div>
+                <div class="task-assignee">أحمد · 1 مارس</div>
+              </div>
+            </div>
+            <div class="shared-task">
+              <div class="task-check done">✓</div>
+              <div>
+                <div class="task-text done">شراء دواء الوالدة</div>
+                <div class="task-assignee">سارة · 5 مارس</div>
+              </div>
+            </div>
+            <div class="shared-task">
+              <div class="task-check"></div>
+              <div>
+                <div class="task-text">دفع فاتورة الكهرباء</div>
+                <div class="task-assignee">أحمد · قبل 15 مارس</div>
+              </div>
+            </div>
+            <div class="shared-task">
+              <div class="task-check"></div>
+              <div>
+                <div class="task-text">حجز موعد طبيب الأطفال</div>
+                <div class="task-assignee">سارة · هذا الأسبوع</div>
+              </div>
+            </div>
+            <div class="shared-task">
+              <div class="task-check"></div>
+              <div>
+                <div class="task-text">تجديد عقد التأمين</div>
+                <div class="task-assignee">أحمد · قبل 20 مارس</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== HEALTH ====== -->
+      <div class="page" id="page-health">
+        <div class="page-header">
+          <div class="back-btn" onclick="showPage('home')">←</div>
+          <div class="page-icon">💊</div>
+          <div class="page-title">الصحة والأدوية</div>
+        </div>
+        <div class="page-body">
+          <div class="sec-label">حالتك الصحية اليوم</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+            <div class="health-stat">
+              <div class="hstat-icon">❤️</div>
+              <div>
+                <div class="hstat-label">ضغط الدم</div>
+                <div class="hstat-val" style="color:var(--accent4);">120/80</div>
+                <div class="hstat-trend" style="color:var(--accent4);">✓ طبيعي</div>
+              </div>
+            </div>
+            <div class="health-stat">
+              <div class="hstat-icon">🩸</div>
+              <div>
+                <div class="hstat-label">السكر</div>
+                <div class="hstat-val" style="color:var(--accent5);">105</div>
+                <div class="hstat-trend" style="color:var(--accent5);">⚠ مراقبة</div>
+              </div>
+            </div>
+            <div class="health-stat">
+              <div class="hstat-icon">🌡️</div>
+              <div>
+                <div class="hstat-label">الحرارة</div>
+                <div class="hstat-val" style="color:var(--accent4);">36.7°</div>
+                <div class="hstat-trend" style="color:var(--accent4);">✓ طبيعي</div>
+              </div>
+            </div>
+            <div class="health-stat">
+              <div class="hstat-icon">🚶</div>
+              <div>
+                <div class="hstat-label">الخطوات</div>
+                <div class="hstat-val" style="color:var(--accent);">6,240</div>
+                <div class="hstat-trend" style="color:var(--accent);">→ 62% هدفك</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="sec-label">جدول الأدوية</div>
+
+          <div class="med-card">
+            <div class="med-icon-wrap" style="background:rgba(0,212,255,0.12);">💊</div>
+            <div class="med-info">
+              <div class="med-name">ميتفورمين 500mg</div>
+              <div class="med-dose">لتنظيم السكر · قرص واحد</div>
+              <div class="med-times">
+                <div class="med-time-chip chip-done">✓ 8ص</div>
+                <div class="med-time-chip chip-pending">⏰ 2م – قريباً</div>
+                <div class="med-time-chip chip-upcoming">• 10م</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="med-card">
+            <div class="med-icon-wrap" style="background:rgba(255,179,0,0.12);">💉</div>
+            <div class="med-info">
+              <div class="med-name">أوميجا 3</div>
+              <div class="med-dose">مكمل غذائي · كبسولتان</div>
+              <div class="med-times">
+                <div class="med-time-chip chip-done">✓ 9ص</div>
+                <div class="med-time-chip chip-upcoming">• 9م</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="med-card">
+            <div class="med-icon-wrap" style="background:rgba(255,107,107,0.12);">🩺</div>
+            <div class="med-info">
+              <div class="med-name">ليزينوبريل 10mg</div>
+              <div class="med-dose">لضغط الدم · قرص واحد يومياً</div>
+              <div class="med-times">
+                <div class="med-time-chip chip-done">✓ 7ص</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="alert-chip" style="border-color:rgba(255,179,0,0.3);color:var(--accent5);background:rgba(255,179,0,0.08);">
+            ⏰ تذكير: ميتفورمين – الجرعة الثانية بعد 45 دقيقة (2:00م)
+          </div>
+
+          <div class="feature-row">
+            <div class="fr-icon">📊</div>
+            <div class="fr-text">
+              <div class="fr-title">تقرير الصحة الأسبوعي</div>
+              <div class="fr-sub">اضغط لمشاهدة الاتجاهات والتحليلات</div>
+            </div>
+            <div class="fr-arrow">›</div>
+          </div>
+          <div class="feature-row">
+            <div class="fr-icon">➕</div>
+            <div class="fr-text">
+              <div class="fr-title">إضافة دواء جديد</div>
+              <div class="fr-sub">حدد الجرعة والتوقيت والتذكيرات</div>
+            </div>
+            <div class="fr-arrow">›</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Nav -->
+      <div class="bottom-nav">
+        <div class="nav-item active" id="nav-home" onclick="showPage('home');setNav('home')">
+          <div class="nav-icon">🏠</div>
+          <div class="nav-label">الرئيسية</div>
+          <div class="nav-dot"></div>
+        </div>
+        <div class="nav-item" id="nav-wallet" onclick="showPage('wallet');setNav('wallet')">
+          <div class="nav-icon">💳</div>
+          <div class="nav-label">المحفظة</div>
+          <div class="nav-dot"></div>
+        </div>
+        <div class="nav-item" id="nav-traffic" onclick="showPage('traffic');setNav('traffic')">
+          <div class="nav-icon">🗺️</div>
+          <div class="nav-label">المرور</div>
+          <div class="nav-dot"></div>
+        </div>
+        <div class="nav-item" id="nav-health" onclick="showPage('health');setNav('health')">
+          <div class="nav-icon">💊</div>
+          <div class="nav-label">الصحة</div>
+          <div class="nav-dot"></div>
+        </div>
+        <div class="nav-item" id="nav-news" onclick="showPage('news');setNav('news')">
+          <div class="nav-icon">📰</div>
+          <div class="nav-label">الأخبار</div>
+          <div class="nav-dot"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feature summary below phone -->
+  <div style="max-width:390px;width:100%;margin-top:28px;padding:0 4px;">
+    <div style="font-family:'Tajawal',sans-serif;font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:16px;text-align:center;">
+      🚀 خريطة ميزات LifeHub
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div style="background:var(--surface2);border-radius:14px;padding:14px;border:1px solid rgba(255,255,255,0.06);">
+        <div style="font-size:.7rem;color:var(--accent);font-weight:700;margin-bottom:6px;">FREE</div>
+        <div style="font-size:.78rem;color:var(--text-muted);line-height:1.8;">
+          ✓ المرور الأساسي<br>✓ 3 أدوية<br>✓ الأخبار اليومية<br>✓ محفظة واحدة
+        </div>
+      </div>
+      <div style="background:linear-gradient(135deg,rgba(123,97,255,0.15),rgba(0,212,255,0.08));border-radius:14px;padding:14px;border:1px solid rgba(123,97,255,0.25);">
+        <div style="font-size:.7rem;color:var(--accent2);font-weight:700;margin-bottom:6px;">PRO – 29ج/شهر</div>
+        <div style="font-size:.78rem;color:var(--text-muted);line-height:1.8;">
+          ✓ AI تحليل المصاريف<br>✓ عائلة كاملة<br>✓ تنبيهات فورية<br>✓ تقارير صحية
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const target = document.getElementById('page-' + id);
+    if (target) target.classList.add('active');
+    // scroll to top
+    const body = target && target.querySelector('.page-body');
+    if (body) body.scrollTop = 0;
+  }
+
+  function setNav(id) {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const navMap = { home:'nav-home', wallet:'nav-wallet', traffic:'nav-traffic', health:'nav-health', news:'nav-news' };
+    const el = document.getElementById(navMap[id]);
+    if (el) el.classList.add('active');
+  }
+
+  // animate budget bars on load
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      document.querySelectorAll('.cong-bar, .budget-bar').forEach(bar => {
+        const w = bar.style.width;
+        bar.style.width = '0';
+        setTimeout(() => { bar.style.width = w; }, 100);
+      });
+    }, 300);
+  });
+</script>
+</body>
+</html>
